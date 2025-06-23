@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 // inserção utilizando ponteiro para ponteiro
+// Lista Duplamente encadeada
 
 typedef struct node{
     int valor;
     struct node *proximo;
+    struct node *anterior;
 }node;
 
 
@@ -14,42 +16,56 @@ void insercao_inicio (node **lista,int num){
     
     new->valor = num;
     new->proximo = *lista;
+    new->anterior = NULL;
+    if(new->proximo != NULL){
+        (*lista)->anterior = new;
+    }
     *lista = new;
 }
 
 void insercao_fim (node **lista, int num){
     node *new = malloc(sizeof(node));
-    node *aux = malloc(sizeof(node));
+    node *aux;
 
     new->valor = num;
     new->proximo = NULL;
     
-    if(*lista == NULL) // verifico se é o primeiro elemento criado
+    if(*lista == NULL) { // verifico se é o primeiro elemento criado
+        new->anterior = NULL;
         *lista = new;
+    }
     else{
         aux = *lista;
         while (aux->proximo != NULL)
             aux = aux->proximo;
         aux->proximo = new;
+        new->anterior = aux;
     }
 }
 
 void insercao_meio(node **lista, int num, int ant){
     node *new = malloc (sizeof(node));
-    node *aux = malloc (sizeof(node));
+    node *aux;
 
     new->valor = num;
 
     if(*lista == NULL){
         new->valor = num;
         new->proximo = NULL;
-        new = *lista;
+        new->anterior = NULL;
+        *lista = new;
     }
     else{
         aux = *lista;
         while(aux->valor != ant && aux->proximo != NULL)
             aux = aux->proximo;
         new->proximo = aux->proximo;
+        new->anterior = aux;
+
+        if(aux->proximo != NULL){
+            aux->proximo->anterior = new;
+            
+        }
         aux->proximo = new;
     }
 }
@@ -62,10 +78,12 @@ void inserir_ordenado(node **lista, int num){
 
     if (*lista == NULL){
         new->proximo = NULL;
+        new->anterior = NULL;
         *lista = new;
     }
     else if (new->valor < (*lista)->valor){
         new->proximo = *lista;
+        (*lista)->anterior = new;
         *lista = new;
     }
     else{
@@ -74,6 +92,8 @@ void inserir_ordenado(node **lista, int num){
             aux = aux->proximo;
         }
         new->proximo = aux->proximo;
+        aux->proximo->anterior = new;
+        new->anterior = aux;
         aux->proximo = new;
     }
 }
@@ -86,6 +106,8 @@ void remover (node **lista, int num){
     if((*lista)->valor == num){
        remove = *lista;
        *lista = remove->proximo;
+       if(*lista != NULL)
+            (*lista)->anterior = NULL;
        free(remove);
        key = 0;
     }
@@ -96,6 +118,8 @@ void remover (node **lista, int num){
         if(aux->proximo != NULL){
             remove = aux->proximo;
             aux->proximo = remove->proximo;
+            if(aux->proximo != NULL)
+                aux->proximo->anterior = aux;
             free(remove);
             key = 0;
         }
@@ -131,6 +155,23 @@ void print (node *lista){
     while(lista){
         printf("%d  ",lista->valor);
         lista = lista->proximo;
+    }
+    printf("\n\n");
+}
+
+node * Ultimo (node ** lista){
+    node *aux = *lista;
+    while (aux->proximo != NULL){
+        aux = aux->proximo;
+    }
+    return aux;
+}
+
+void ImprimirContrario (node *lista){
+    printf("\t Lista Inversa:\n\t");
+    while(lista){
+        printf("%d  ",lista->valor);
+        lista = lista->anterior;
     }
     printf("\n\n");
 }
@@ -183,6 +224,7 @@ int main(){
                 break;
             case 7:
                 print(lista); 
+                ImprimirContrario(Ultimo(&lista));
                 break;
             default:
                 if(key == 0) break;
